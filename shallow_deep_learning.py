@@ -92,7 +92,11 @@ embedding_dim = 9
 W_b = np.random.normal(size=(embedding_dim, n_batters))
 W_p = np.random.normal(size=(embedding_dim, n_pitchers))
 
+# Equivalent to:
+# batter_embeds = W_b[:, batter_idxs]
 batter_embeds = W_b @ batter_one_hots.T
+# Equivalent to:
+# pitcher_embeds = W_p[:, pitcher_idxs]
 pitcher_embeds = W_p @ pitcher_one_hots.T
 
 cat_embeds = np.hstack([batter_embeds.T, pitcher_embeds.T])
