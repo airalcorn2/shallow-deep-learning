@@ -181,11 +181,11 @@ for epoch in range(epochs):
     model.train()
     for train_tensors in train_loader:
         optimizer.zero_grad()
-        pred_logits = model(
+        scores = model(
             train_tensors["batter"].flatten().to(device),
             train_tensors["pitcher"].flatten().to(device),
         )
-        loss = criterion(pred_logits, train_tensors["outcome"].flatten().to(device))
+        loss = criterion(scores, train_tensors["outcome"].flatten().to(device))
         loss.backward()
         optimizer.step()
 
@@ -193,12 +193,12 @@ for epoch in range(epochs):
     val_loss = 0
     for valid_tensors in valid_loader:
         with torch.no_grad():
-            pred_logits = model(
+            scores = model(
                 valid_tensors["batter"].flatten().to(device),
                 valid_tensors["pitcher"].flatten().to(device),
             )
             val_loss += criterion(
-                pred_logits, valid_tensors["outcome"].flatten().to(device)
+                scores, valid_tensors["outcome"].flatten().to(device)
             ).item()
 
     print(val_loss, flush=True)
