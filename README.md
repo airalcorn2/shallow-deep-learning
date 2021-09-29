@@ -4,6 +4,6 @@ This repository contains the accompanying [code](https://github.com/airalcorn2/s
 
 ## Past Mini Workshops
 
-* 2021-09-26 – United States Department of Agriculture (USDA) Agricultural Research Service (ARS) SCINet fellows.
+* 2021-09-29 – United States Department of Agriculture (USDA) Agricultural Research Service (ARS) SCINet fellows.
 * 2021-09-09 – Data Science Society at Auburn University.
 * 2020-07-27 – Cleveland Indians Research & Development team.
