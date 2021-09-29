@@ -309,7 +309,8 @@ x_t = X[None, t]
 pre_t_xs = X[:t]
 pre_t_xs_w_x_t = torch.cat([pre_t_xs, x_t.expand(t, -1)], dim=1)
 scores = attn(pre_t_xs_w_x_t)
-c = pre_t_xs.T @ scores
+weights = torch.softmax(scores, 0)
+c = pre_t_xs.T @ weights
 x_t_with_c = torch.cat([x_t, c.T], dim=1)
 print(x_t_with_c)
 
@@ -322,7 +323,7 @@ nhead = 5
 encoder_layers = TransformerEncoderLayer(features, nhead, hidden_nodes)
 num_layers = 3
 transformer_encoder = TransformerEncoder(encoder_layers, num_layers)
-seq_mask = (torch.triu(torch.ones(seq_len, seq_len)) == 1).transpose(0, 1)
+seq_mask = torch.tril(torch.ones(seq_len, seq_len)) == 1
 seq_mask = (
     seq_mask.float()
     .masked_fill(seq_mask == 0, float("-inf"))
