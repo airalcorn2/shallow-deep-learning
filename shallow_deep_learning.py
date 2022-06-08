@@ -36,9 +36,9 @@ my_array = np.random.normal(size=shape)
 print(my_array.shape)
 (row_idx, col_idx) = (20, 5)
 print(my_array[row_idx, col_idx])
-# Access all rows and a single column.
+# Accessing all rows and a single column.
 print(my_array[:, col_idx])
-# Access all rows except the first three and the last three and a single column.
+# Accessing all rows except the first three and the last three and a single column.
 print(my_array[3:-3, col_idx])
 
 # Linear algebra.
@@ -144,6 +144,7 @@ out = model(test_batters, test_pitchers)
 # Training a model.
 
 
+# Defining a PyTorch dataset.
 class BatterPitcher2VecDataset(Dataset):
     def __init__(self):
         N = 128
@@ -162,6 +163,7 @@ class BatterPitcher2VecDataset(Dataset):
         }
 
 
+# Model training loop.
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = BatterPitcher2Vec(n_batters, n_pitchers, embedding_dim, n_outcomes).to(device)
 
@@ -172,13 +174,15 @@ optimizer = torch.optim.Adam(train_params, lr=learning_rate)
 
 train_dataset = BatterPitcher2VecDataset()
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-valid_loader = train_loader
+valid_dataset = BatterPitcher2VecDataset()
+valid_loader = DataLoader(dataset=valid_dataset, batch_size=batch_size)
 
-# Train model.
 epochs = 200
 best_val_loss = np.inf
 for epoch in range(epochs):
+    print(f"epoch: {epoch}")
     model.train()
+    train_loss = 0
     for train_tensors in train_loader:
         optimizer.zero_grad()
         scores = model(
@@ -186,6 +190,7 @@ for epoch in range(epochs):
             train_tensors["pitcher"].flatten().to(device),
         )
         loss = criterion(scores, train_tensors["outcome"].flatten().to(device))
+        train_loss += loss.item()
         loss.backward()
         optimizer.step()
 
@@ -201,7 +206,7 @@ for epoch in range(epochs):
                 scores, valid_tensors["outcome"].flatten().to(device)
             ).item()
 
-    print(val_loss, flush=True)
+    print(f"train_loss: {train_loss}\nval_loss: {val_loss}\n")
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         torch.save(model.state_dict(), "batter_pitcher2vec.pth")
@@ -323,11 +328,6 @@ nhead = 5
 encoder_layers = TransformerEncoderLayer(features, nhead, hidden_nodes)
 num_layers = 3
 transformer_encoder = TransformerEncoder(encoder_layers, num_layers)
-seq_mask = torch.tril(torch.ones(seq_len, seq_len)) == 1
-seq_mask = (
-    seq_mask.float()
-    .masked_fill(seq_mask == 0, float("-inf"))
-    .masked_fill(seq_mask == 1, float(0.0))
-)
+seq_mask = torch.triu(torch.ones(seq_len, seq_len) * float("-inf"), diagonal=1)
 out = transformer_encoder(torch.Tensor(X), seq_mask)
 print(out[:, 0])
